@@ -1,7 +1,11 @@
+kernel/fs/exfat/exfat.ko
 kernel/fs/incfs/incrementalfs.ko
 kernel/drivers/soc/qcom/llcc_perfmon.ko
 kernel/drivers/char/rdbg.ko
-kernel/drivers/fragmention/fragmentize.ko
+kernel/drivers/input/misc/aw8697_haptic/aw8697-haptic.ko
+kernel/drivers/input/fingerprint/fpc_tee/fpc1020.ko
+kernel/drivers/hwtracing/google/coresight-clk-placeholder.ko
+kernel/drivers/hwtracing/google/coresight-clk-amba-placeholder.ko
 kernel/techpack/audio/soc/pinctrl_wcd_dlkm.ko
 kernel/techpack/audio/soc/pinctrl_lpi_dlkm.ko
 kernel/techpack/audio/soc/swr_dlkm.ko
