@@ -43,7 +43,8 @@
 #define LSM_POLLING_ENABLE (7)
 #define LSM_DET_EVENT_TYPE (8)
 #define LSM_LAB_CONTROL (9)
-#define LSM_PARAMS_MAX (LSM_LAB_CONTROL + 1)
+#define LSM_GET_CUSTOM_PARAMS (10)
+#define LSM_PARAMS_MAX (LSM_GET_CUSTOM_PARAMS + 1)
 #define LSM_EVENT_NON_TIME_STAMP_MODE (0)
 #define LSM_EVENT_TIME_STAMP_MODE (1)
 #define LSM_DET_EVENT_TYPE_LEGACY (0)
@@ -160,6 +161,16 @@ struct snd_lsm_input_hw_params {
   __u16 bit_width;
   __u16 num_channels;
 } __attribute__((packed));
+struct lsm_params_get_info {
+  __u32 module_id;
+  __u16 instance_id;
+  __u16 reserved;
+  __u32 param_id;
+  __u32 param_size;
+  uint32_t param_type;
+  __u16 stage_idx;
+  __u8 payload[0];
+} __attribute__((packed));
 #define SNDRV_LSM_DEREG_SND_MODEL _IOW('U', 0x01, int)
 #define SNDRV_LSM_EVENT_STATUS _IOW('U', 0x02, struct snd_lsm_event_status)
 #define SNDRV_LSM_ABORT_EVENT _IOW('U', 0x03, int)
@@ -179,4 +190,5 @@ struct snd_lsm_input_hw_params {
 #define SNDRV_LSM_SET_INPUT_HW_PARAMS _IOW('U', 0x11, struct snd_lsm_input_hw_params)
 #define SNDRV_LSM_SET_SESSION_DATA_V2 _IOW('U', 0x12, struct snd_lsm_session_data_v2)
 #define SNDRV_LSM_SET_MODULE_PARAMS_V2 _IOW('U', 0x13, struct snd_lsm_module_params)
+#define SNDRV_LSM_GET_MODULE_PARAMS _IOWR('U', 0x14, struct lsm_params_get_info)
 #endif

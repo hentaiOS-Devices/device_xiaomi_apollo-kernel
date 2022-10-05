@@ -74,6 +74,7 @@
 #define KGSL_OBJLIST_PROFILE 0x00000010U
 #define KGSL_CMD_SYNCPOINT_TYPE_TIMESTAMP 0
 #define KGSL_CMD_SYNCPOINT_TYPE_FENCE 1
+#define KGSL_CMD_SYNCPOINT_TYPE_TIMELINE 2
 #define KGSL_MEMFLAGS_SECURE 0x00000008ULL
 #define KGSL_MEMFLAGS_GPUREADONLY 0x01000000U
 #define KGSL_MEMFLAGS_GPUWRITEONLY 0x02000000U
@@ -166,13 +167,13 @@ struct kgsl_devinfo {
   size_t gmem_sizebytes;
 };
 struct kgsl_devmemstore {
-  volatile unsigned int soptimestamp;
+  __volatile__ unsigned int soptimestamp;
   unsigned int sbz;
-  volatile unsigned int eoptimestamp;
+  __volatile__ unsigned int eoptimestamp;
   unsigned int sbz2;
-  volatile unsigned int preempted;
+  __volatile__ unsigned int preempted;
   unsigned int sbz3;
-  volatile unsigned int ref_wait_ts;
+  __volatile__ unsigned int ref_wait_ts;
   unsigned int sbz4;
   unsigned int current_context;
   unsigned int sbz5;
@@ -322,7 +323,7 @@ struct kgsl_cmdbatch_profiling_buffer {
 #define KGSL_IOC_TYPE 0x09
 struct kgsl_device_getproperty {
   unsigned int type;
-  void __user * value;
+  void * value;
   size_t sizebytes;
 };
 #define IOCTL_KGSL_DEVICE_GETPROPERTY _IOWR(KGSL_IOC_TYPE, 0x2, struct kgsl_device_getproperty)
@@ -477,7 +478,7 @@ struct kgsl_timestamp_event {
   int type;
   unsigned int timestamp;
   unsigned int context_id;
-  void __user * priv;
+  void * priv;
   size_t len;
 };
 #define IOCTL_KGSL_TIMESTAMP_EVENT_OLD _IOW(KGSL_IOC_TYPE, 0x31, struct kgsl_timestamp_event)
@@ -545,7 +546,7 @@ struct kgsl_perfcounter_put {
 #define IOCTL_KGSL_PERFCOUNTER_PUT _IOW(KGSL_IOC_TYPE, 0x39, struct kgsl_perfcounter_put)
 struct kgsl_perfcounter_query {
   unsigned int groupid;
-  unsigned int __user * countables;
+  unsigned int * countables;
   unsigned int count;
   unsigned int max_counters;
   unsigned int __pad[2];
@@ -557,13 +558,13 @@ struct kgsl_perfcounter_read_group {
   unsigned long long value;
 };
 struct kgsl_perfcounter_read {
-  struct kgsl_perfcounter_read_group __user * reads;
+  struct kgsl_perfcounter_read_group * reads;
   unsigned int count;
   unsigned int __pad[2];
 };
 #define IOCTL_KGSL_PERFCOUNTER_READ _IOWR(KGSL_IOC_TYPE, 0x3B, struct kgsl_perfcounter_read)
 struct kgsl_gpumem_sync_cache_bulk {
-  unsigned int __user * id_list;
+  unsigned int * id_list;
   unsigned int count;
   unsigned int op;
   unsigned int __pad[2];
@@ -576,9 +577,14 @@ struct kgsl_cmd_syncpoint_timestamp {
 struct kgsl_cmd_syncpoint_fence {
   int fd;
 };
+struct kgsl_cmd_syncpoint_timeline {
+  __u64 timelines;
+  __u32 count;
+  __u32 timelines_size;
+};
 struct kgsl_cmd_syncpoint {
   int type;
-  void __user * priv;
+  void * priv;
   size_t size;
 };
 #define KGSL_IBDESC_MEMLIST 0x1
@@ -586,9 +592,9 @@ struct kgsl_cmd_syncpoint {
 struct kgsl_submit_commands {
   unsigned int context_id;
   unsigned int flags;
-  struct kgsl_ibdesc __user * cmdlist;
+  struct kgsl_ibdesc * cmdlist;
   unsigned int numcmds;
-  struct kgsl_cmd_syncpoint __user * synclist;
+  struct kgsl_cmd_syncpoint * synclist;
   unsigned int numsyncs;
   unsigned int timestamp;
   unsigned int __pad[4];
@@ -597,7 +603,7 @@ struct kgsl_submit_commands {
 struct kgsl_device_constraint {
   unsigned int type;
   unsigned int context_id;
-  void __user * data;
+  void * data;
   size_t size;
 };
 #define KGSL_CONSTRAINT_NONE 0
@@ -650,7 +656,7 @@ struct kgsl_gpuobj_alloc {
 #define IOCTL_KGSL_GPUOBJ_ALLOC _IOWR(KGSL_IOC_TYPE, 0x45, struct kgsl_gpuobj_alloc)
 struct kgsl_gpuobj_free {
   uint64_t flags;
-  uint64_t __user priv;
+  uint64_t priv;
   unsigned int id;
   unsigned int type;
   unsigned int len;
@@ -676,7 +682,7 @@ struct kgsl_gpuobj_info {
 };
 #define IOCTL_KGSL_GPUOBJ_INFO _IOWR(KGSL_IOC_TYPE, 0x47, struct kgsl_gpuobj_info)
 struct kgsl_gpuobj_import {
-  uint64_t __user priv;
+  uint64_t priv;
   uint64_t priv_len;
   uint64_t flags;
   unsigned int type;
@@ -696,7 +702,7 @@ struct kgsl_gpuobj_sync_obj {
   unsigned int op;
 };
 struct kgsl_gpuobj_sync {
-  uint64_t __user objs;
+  uint64_t objs;
   unsigned int obj_len;
   unsigned int count;
 };
@@ -709,19 +715,19 @@ struct kgsl_command_object {
   unsigned int id;
 };
 struct kgsl_command_syncpoint {
-  uint64_t __user priv;
+  uint64_t priv;
   uint64_t size;
   unsigned int type;
 };
 struct kgsl_gpu_command {
   uint64_t flags;
-  uint64_t __user cmdlist;
+  uint64_t cmdlist;
   unsigned int cmdsize;
   unsigned int numcmds;
-  uint64_t __user objlist;
+  uint64_t objlist;
   unsigned int objsize;
   unsigned int numobjs;
-  uint64_t __user synclist;
+  uint64_t synclist;
   unsigned int syncsize;
   unsigned int numsyncs;
   unsigned int context_id;
@@ -729,7 +735,7 @@ struct kgsl_gpu_command {
 };
 #define IOCTL_KGSL_GPU_COMMAND _IOWR(KGSL_IOC_TYPE, 0x4A, struct kgsl_gpu_command)
 struct kgsl_preemption_counters_query {
-  uint64_t __user counters;
+  uint64_t counters;
   unsigned int size_user;
   unsigned int size_priority_level;
   unsigned int max_priority_level;
@@ -776,7 +782,7 @@ struct kgsl_sparse_binding_object {
   unsigned int id;
 };
 struct kgsl_sparse_bind {
-  uint64_t __user list;
+  uint64_t list;
   unsigned int id;
   unsigned int size;
   unsigned int count;
@@ -784,8 +790,8 @@ struct kgsl_sparse_bind {
 #define IOCTL_KGSL_SPARSE_BIND _IOW(KGSL_IOC_TYPE, 0x54, struct kgsl_sparse_bind)
 struct kgsl_gpu_sparse_command {
   uint64_t flags;
-  uint64_t __user sparselist;
-  uint64_t __user synclist;
+  uint64_t sparselist;
+  uint64_t synclist;
   unsigned int sparsesize;
   unsigned int numsparse;
   unsigned int syncsize;
@@ -795,4 +801,66 @@ struct kgsl_gpu_sparse_command {
   unsigned int id;
 };
 #define IOCTL_KGSL_GPU_SPARSE_COMMAND _IOWR(KGSL_IOC_TYPE, 0x55, struct kgsl_gpu_sparse_command)
+#define KGSL_GPU_AUX_COMMAND_TIMELINE (1 << 1)
+#define KGSL_GPU_AUX_COMMAND_SYNC KGSL_CMDBATCH_SYNC
+struct kgsl_gpu_aux_command_generic {
+  __u64 priv;
+  __u64 size;
+  __u32 type;
+  __u32 padding;
+};
+struct kgsl_gpu_aux_command {
+  __u64 flags;
+  __u64 cmdlist;
+  __u32 cmdsize;
+  __u32 numcmds;
+  __u64 synclist;
+  __u32 syncsize;
+  __u32 numsyncs;
+  __u32 context_id;
+  __u32 timestamp;
+};
+#define IOCTL_KGSL_GPU_AUX_COMMAND _IOWR(KGSL_IOC_TYPE, 0x57, struct kgsl_gpu_aux_command)
+struct kgsl_timeline_create {
+  __u64 seqno;
+  __u32 id;
+  __u32 padding;
+};
+#define IOCTL_KGSL_TIMELINE_CREATE _IOWR(KGSL_IOC_TYPE, 0x58, struct kgsl_timeline_create)
+struct kgsl_timeline_val {
+  __u64 seqno;
+  __u32 timeline;
+  __u32 padding;
+};
+#define KGSL_TIMELINE_WAIT_ALL 1
+#define KGSL_TIMELINE_WAIT_ANY 2
+struct kgsl_timeline_wait {
+  __s64 tv_sec;
+  __s64 tv_nsec;
+  __u64 timelines;
+  __u32 count;
+  __u32 timelines_size;
+  __u32 flags;
+  __u32 padding;
+};
+#define IOCTL_KGSL_TIMELINE_WAIT _IOW(KGSL_IOC_TYPE, 0x59, struct kgsl_timeline_wait)
+#define IOCTL_KGSL_TIMELINE_QUERY _IOWR(KGSL_IOC_TYPE, 0x5A, struct kgsl_timeline_val)
+struct kgsl_timeline_signal {
+  __u64 timelines;
+  __u32 count;
+  __u32 timelines_size;
+};
+#define IOCTL_KGSL_TIMELINE_SIGNAL _IOW(KGSL_IOC_TYPE, 0x5B, struct kgsl_timeline_signal)
+struct kgsl_timeline_fence_get {
+  __u64 seqno;
+  __u32 timeline;
+  int handle;
+};
+#define IOCTL_KGSL_TIMELINE_FENCE_GET _IOWR(KGSL_IOC_TYPE, 0x5C, struct kgsl_timeline_fence_get)
+#define IOCTL_KGSL_TIMELINE_DESTROY _IOW(KGSL_IOC_TYPE, 0x5D, __u32)
+struct kgsl_gpu_aux_command_timeline {
+  __u64 timelines;
+  __u32 count;
+  __u32 timelines_size;
+};
 #endif

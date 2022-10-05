@@ -55,6 +55,7 @@
 #define MSM_NPU_PROP_ID_FW_GETCAPS (MSM_NPU_FW_PROP_ID_START + 5)
 #define MSM_NPU_FEATURE_MULTI_EXECUTE 0x1
 #define MSM_NPU_FEATURE_ASYNC_EXECUTE 0x2
+#define MSM_NPU_FEATURE_DSP_SID_MAPPED 0x8
 #define PROP_PARAM_MAX_SIZE 8
 struct msm_npu_patch_info {
   uint32_t chunk_id;
